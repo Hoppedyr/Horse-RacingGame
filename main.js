@@ -4,23 +4,17 @@ diamondsCounter = 1;
 heartsCounter = 1;
 clubsCounter = 1;
 
-two = false;
-three = false;
-four = false;
-five = false;
-six = false;
-seven = false;
-eight = false;
-nine = false;
-ten = false;
+penaltyCards = [];
+pentalties = 9;
 
-moveBack = [];
+randomness = 10000000;
+
 pickedCard = [];
-counter = 0
+deckIndex = 0
 
+// Allocate array for the shuffled deck
 
-shuffleArray = [];
-cardArray = [            
+cardArray = [
 {
     "suit": "hearts",
     "value": 2
@@ -230,39 +224,48 @@ cardArray = [
     "value": "A"
 }
 ]
+shuffledDeck = cardArray;
 
-
-
+// Populate pickedCard array with booleans
 cardArray.forEach(element => {
-    pickedCard.push(false);
+    pickedCard.push(new Boolean(false));
 });
 
-for (let i = 0; i < 52; i++) {
-    let randomCard = Math.floor(Math.random() * 51)  
-    if(pickedCard[randomCard] == false){
-        pickedCard[randomCard] == true;
-        shuffleArray[i] = cardArray[randomCard]
-    } else {
-        i--
-    }
+// Shuffle the deck and populate the shuffled deck
+let i = 0;
+while (i < randomness) {
+    let randomCard0 = Math.floor(Math.random() * 52)
+    let randomCard1 = Math.floor(Math.random() * 52)
+
+    let tempCard = shuffledDeck[randomCard0];
+    shuffledDeck[randomCard0] = shuffledDeck[randomCard1]
+    shuffledDeck[randomCard1] = tempCard
+    
+    i++;
 }
 
-for(let i = 0; i < 10; i++){
-    moveBack.push(shuffleArray[i])
-    counter++
+// Select the first 9 cards of the shuffled deck for penalty cards
+for(let i = 0; i < pentalties; i++){
+    penaltyCards.push(shuffledDeck[i])
+    deckIndex++
 }
 
-console.log(shuffleArray);
-console.log(moveBack);
-
+console.log(shuffledDeck);
+console.log(penaltyCards);
 
 
 
 $("#start").click(function () {
     var inteval = setInterval(() => {
-        console.log(moveBack)
+        console.log(penaltyCards)
+        console.log(spadesCounter);
+        console.log(heartsCounter);
+        console.log(diamondsCounter);
+        console.log(clubsCounter);
+
         if (game() != 'gameOver') {
-            checkMoveBack()
+            checkForPenalty()
+            deckIndex++;
         } else {
             clearInterval(inteval);
             reset()
@@ -272,18 +275,8 @@ $("#start").click(function () {
 
 
 function game() {
-
-    let randomNum = Math.floor(Math.random()* 51)
-    cardArray[randomNum]
-
-    if(cardArray[randomNum] != null){
-    console.log(cardArray[randomNum].suit)
-    
-    shuffleArray[counter]
-
-
     //$('#text').remove()
-    switch (cardArray[randomNum].suit) {
+    switch (shuffledDeck[deckIndex].suit) {
         case 'spades':
             var cardToMove = 'spades'
             $(`#${cardToMove}` + spadesCounter).css('opacity', 0)
@@ -293,7 +286,7 @@ function game() {
                 alert(`${cardToMove} WON!`)
                 return 'gameOver'
             }
-            $('#card_move_spades').append("<p id='text'>spades moves</p>");
+            $('#card_move_spades').append(`<p id='text'>${shuffledDeck[deckIndex].value} of ${shuffledDeck[deckIndex].suit}</p>`);
             break;
         case 'diamonds':
             var cardToMove = 'diamonds'
@@ -304,7 +297,7 @@ function game() {
                 alert(`${cardToMove} WON!`)
                 return 'gameOver'
             }
-            $('#card_move_diamonds').append("<p id='text'>diamonds moves</p>");
+            $('#card_move_diamonds').append(`<p id='text'>${shuffledDeck[deckIndex].value} of ${shuffledDeck[deckIndex].suit}</p>`);
             break;
         case 'hearts':
             var cardToMove = 'hearts'
@@ -315,7 +308,7 @@ function game() {
                 alert(`${cardToMove} WON!`)
                 return 'gameOver'
             }
-            $('#card_move_hearts').append("<p id='text'>hearts moves</p>");
+            $('#card_move_hearts').append(`<p id='text'>${shuffledDeck[deckIndex].value} of ${shuffledDeck[deckIndex].suit}</p>`);
             break;
         case 'clubs':
             var cardToMove = 'clubs'
@@ -326,89 +319,98 @@ function game() {
                 alert(`${cardToMove} WON!`)
                 return 'gameOver'
             }
-            $('#card_move_clubs').append("<p id='text'>clubs moves</p>");
+            $('#card_move_clubs').append(`<p id='text'>${shuffledDeck[deckIndex].value} of ${shuffledDeck[deckIndex].suit}</p>`);
             break;
     }
-}else{
-    cardArray[randomNum] == null;
-}
 }
 
 
-function checkMoveBack() {
-    if (spadesCounter >= 2 && diamondsCounter >= 2 && heartsCounter >= 2 && clubsCounter >= 2 && two != true) {
-        two = true;
-        let cardMovedBack = moveBack()
+function checkForPenalty() {
+    // In reverse order go through the penalty positions
+    if (spadesCounter >= 10 && diamondsCounter >= 10 && heartsCounter >= 10 && clubsCounter >= 10 && penaltyCards[8] != null) {
+        let cardMovedBack = moveBack(penaltyCards[8])
+        // Remove the card from the penalty stack
+        penaltyCards[8] = null;
+        $('#ten').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
+
+    } else if (spadesCounter >= 9 && diamondsCounter >= 9 && heartsCounter >= 9 && clubsCounter >= 9 && penaltyCards[7] != null) {
+        let cardMovedBack = moveBack(penaltyCards[7])
+        // Remove the card from the penalty stack
+        penaltyCards[7] = null;
+        $('#nine').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
+
+    } else if (spadesCounter >= 8 && diamondsCounter >= 8 && heartsCounter >= 8 && clubsCounter >= 8 && penaltyCards[6] != null) {
+        let cardMovedBack = moveBack(penaltyCards[6])
+        // Remove the card from the penalty stack
+        penaltyCards[6] = null;
+        $('#eight').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
+
+    } else if (spadesCounter >= 7 && diamondsCounter >= 7 && heartsCounter >= 7 && clubsCounter >= 7 && penaltyCards[5] != null) {
+        let cardMovedBack = moveBack(penaltyCards[5])
+        // Remove the card from the penalty stack
+        penaltyCards[5] = null;
+        $('#seven').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
+
+    } else if (spadesCounter >= 6 && diamondsCounter >= 6 && heartsCounter >= 6 && clubsCounter >= 6 && penaltyCards[4] != null) {
+        let cardMovedBack = moveBack(penaltyCards[4])
+        // Remove the card from the penalty stack
+        penaltyCards[4] = null;
+        $('#six').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
+
+    } else if (spadesCounter >= 5 && diamondsCounter >= 5 && heartsCounter >= 5 && clubsCounter >= 5 && penaltyCards[3] != null) {
+        let cardMovedBack = moveBack(penaltyCards[3])
+        // Remove the card from the penalty stack
+        penaltyCards[3] = null;
+        $('#five').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
+
+    } else if (spadesCounter >= 4 && diamondsCounter >= 4 && heartsCounter >= 4 && clubsCounter >= 4 && penaltyCards[2] != null) {
+        let cardMovedBack = moveBack(penaltyCards[2])
+        // Remove the card from the penalty stack
+        penaltyCards[2] = null;
+        $('#four').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
+
+    } else if (spadesCounter >= 3 && diamondsCounter >= 3 && heartsCounter >= 3 && clubsCounter >= 3 && penaltyCards[1] != null) {
+        let cardMovedBack = moveBack(penaltyCards[1])
+        // Remove the card from the penalty stack
+        penaltyCards[1] = null;
+        $('#three').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
+
+    } else if (spadesCounter >= 2 && diamondsCounter >= 2 && heartsCounter >= 2 && clubsCounter >= 2 && penaltyCards[0] != null) {
+        let cardMovedBack = moveBack(penaltyCards[0])
+        // Remove the card from the penalty stack
+        penaltyCards[0] = null;
         $('#two').append(`<span class='show_moved_back'>${cardMovedBack}</span>`);
     }
-    if (spadesCounter >= 3 && diamondsCounter >= 3 && heartsCounter >= 3 && clubsCounter >= 3 && three != true) {
-        three = true;
-        let cardMovedBack = moveBack()
-        $('#three').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
-    }
-    if (spadesCounter >= 4 && diamondsCounter >= 4 && heartsCounter >= 4 && clubsCounter >= 4 && four != true) {
-        four = true;
-        let cardMovedBack = moveBack()
-        $('#four').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
-    }
-    if (spadesCounter >= 5 && diamondsCounter >= 5 && heartsCounter >= 5 && clubsCounter >= 5 && five != true) {
-        five = true;
-        let cardMovedBack = moveBack()
-        $('#five').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
-    }
-    if (spadesCounter >= 6 && diamondsCounter >= 6 && heartsCounter >= 6 && clubsCounter >= 6 && six != true) {
-        six = true;
-        let cardMovedBack = moveBack()
-        $('#six').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
-    }
-    if (spadesCounter >= 7 && diamondsCounter >= 7 && heartsCounter >= 7 && clubsCounter >= 7 && seven != true) {
-        seven = true;
-        let cardMovedBack = moveBack()
-        $('#seven').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
-    }
-    if (spadesCounter >= 8 && diamondsCounter >= 8 && heartsCounter >= 8 && clubsCounter >= 8 && eight != true) {
-        eight = true;
-        let cardMovedBack = moveBack()
-        $('#eight').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
-    }
-    if (spadesCounter >= 9 && diamondsCounter >= 9 && heartsCounter >= 9 && clubsCounter >= 9 && nine != true) {
-        nine = true;
-        let cardMovedBack = moveBack()
-        $('#nine').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
-    }
-    if (spadesCounter >= 10 && diamondsCounter >= 10 && heartsCounter >= 10 && clubsCounter >= 10 && ten != true) {
-        ten = true;
-        let cardMovedBack = moveBack()
-        $('#ten').append(`<div class='show_moved_back'>${cardMovedBack}</div>`);
-    }
 }
 
-function moveBack() {
-    let card = Math.floor(Math.random() * 4);
-    switch (card) {
-        case 0:
-            var cardToMove = 'spades'
+function moveBack(penaltyCard) {
+    console.log(penaltyCard.value + " - " +  penaltyCards.suit);
+    
+    //let card = Math.floor(Math.random() * 4);
+    switch (penaltyCard.suit) {
+        case 'spades':
+            var cardToMove = penaltyCard.value + ' of ' + penaltyCard.suit;
             $(`#${cardToMove}` + spadesCounter).css('opacity', 0)
             spadesCounter--
             $(`#${cardToMove}` + spadesCounter).css('opacity', 1)
             return cardToMove
             break;
-        case 1:
-            var cardToMove = 'diamonds'
+        case 'diamonds':
+            var cardToMove = penaltyCard.value + ' of ' + penaltyCard.suit;
             $(`#${cardToMove}` + diamondsCounter).css('opacity', 0)
             diamondsCounter--
             $(`#${cardToMove}` + diamondsCounter).css('opacity', 1)
             return cardToMove
             break;
-        case 2:
-            var cardToMove = 'hearts'
+        case 'hearts':
+            var cardToMove = penaltyCard.value + ' of ' + penaltyCard.suit;
             $(`#${cardToMove}` + heartsCounter).css('opacity', 0)
             heartsCounter--
             $(`#${cardToMove}` + heartsCounter).css('opacity', 1)
             return cardToMove
             break;
-        case 3:
-            var cardToMove = 'clubs'
+        case 'clubs':
+            var cardToMove = penaltyCard.value + ' of ' + penaltyCard.suit;
             $(`#${cardToMove}` + clubsCounter).css('opacity', 0)
             clubsCounter--
             $(`#${cardToMove}` + clubsCounter).css('opacity', 1)
